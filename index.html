@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mati – 3D Modeler for Roblox</title>
+<style>
+  /* Seu CSS exatamente igual */
+  /* Reset básico */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background-color: #2d3748;
+    color: #f7fafc;
+    padding: 1rem 2rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.8rem;
+    letter-spacing: 1.2px;
+  }
+
+  nav {
+    background: #4a5568;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.7rem 0;
+  }
+
+  nav button {
+    background: transparent;
+    border: none;
+    color: #cbd5e0;
+    font-weight: 600;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  nav button.active,
+  nav button:hover {
+    background-color: #63b3ed;
+    color: #1a202c;
+  }
+
+  main {
+    flex-grow: 1;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  section {
+    display: none;
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  section.active {
+    display: block;
+  }
+
+  h1, h2 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  ul li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Portfolio images */
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .portfolio-item {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    transition: transform 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .portfolio-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .portfolio-item img {
+    width: 100%;
+    display: block;
+    object-fit: contain;
+    max-height: 180px;
+  }
+
+  .portfolio-caption {
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    background: #edf2f7;
+    color: #2d3748;
+    flex-grow: 1;
+  }
+
+  .portfolio-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    background: #4299e1;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: 12px;
+    vertical-align: middle;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #f56565;
+    border: none;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: none;
+    z-index: 2;
+  }
+
+  .portfolio-item.owner .remove-btn {
+    display: block;
+  }
+
+  /* Dono botão + */
+  #add-btn {
+    display:none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background:#4299e1;
+    border:none;
+    color:#fff;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    cursor:pointer;
+    z-index: 1000;
+  }
+
+  /* Painel de edição */
+  #edit-panel {
+    display:none;
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    width: 320px;
+    background: #f0f4f8;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.15);
+    padding: 1rem;
+    border-radius: 8px;
+    z-index: 1000;
+  }
+
+  #edit-panel h3 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+  }
+
+  #edit-panel input[type="text"], #edit-panel select {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+  }
+
+  #edit-panel input[type="file"] {
+    margin-bottom: 0.5rem;
+  }
+
+  #add-item-btn {
+    background:#48bb78;
+    border:none;
+    color:#fff;
+    padding:0.5rem 1rem;
+    cursor:pointer;
+    border-radius:4px;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  #portfolio-list {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+
+  #portfolio-list p {
+    margin-bottom: 0.3rem;
+  }
+
+  /* Footer */
+  footer {
+    background-color: #2d3748;
+    color: #f7fafc;
+    text-align: center;
+    padding: 1rem 0;
+    font-size: 0.9rem;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    nav {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    #edit-panel {
+      width: 90vw;
+      left: 5vw;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>Mati – 3D Modeler for Roblox</header>
+
+<nav>
+  <button class="active" data-tab="home">Home</button>
+  <button data-tab="services">Services</button>
+  <button data-tab="portfolio">Portfolio</button>
+  <button data-tab="pricing">Pricing</button>
+  <button data-tab="contact">Contact</button>
+</nav>
+
+<main>
+  <section id="home" class="active" role="tabpanel" tabindex="0" aria-label="Home">
+    <h1>Welcome!</h1>
+    <p>With extensive experience in creating high-quality 3D assets for Roblox, I deliver fast and optimized models designed to enhance gameplay and performance.</p>
+    <p>Committed to attention to detail and client satisfaction.</p>
+  </section>
+
+  <section id="services" role="tabpanel" tabindex="0" aria-label="Services">
+    <h2>Services I Offer</h2>
+    <ul>
+      <li>Stylized 3D modeling</li>
+      <li>Low-poly optimization for better performance</li>
+      <li>Delivery in .rbxm, .fbx, and .obj formats, ready for Roblox</li>
+    </ul>
+  </section>
+
+  <section id="portfolio" role="tabpanel" tabindex="0" aria-label="Portfolio">
+    <h2>Portfolio</h2>
+    <div class="portfolio-grid"></div>
+  </section>
+
+  <section id="pricing" role="tabpanel" tabindex="0" aria-label="Pricing">
+    <h2>Pricing</h2>
+    <ul>
+      <li>Simple models: 300–800 Robux</li>
+      <li>Larger or more detailed models: 1,000+ Robux</li>
+      <li>Negotiable depending on project complexity</li>
+    </ul>
+  </section>
+
+  <section id="contact" role="tabpanel" tabindex="0" aria-label="Contact">
+    <h2>Contact Me</h2>
+    <p>If you're interested in my work, feel free to reach out on Discord!</p>
+    <p><strong>Contact on Discord.<br>My user: jsfx0</strong></p>
+  </section>
+</main>
+
+<!-- Botão + para dono -->
+<button id="add-btn" title="Add portfolio item">+</button>
+
+<!-- Painel de edição para dono -->
+<div id="edit-panel">
+  <h3>Manage Portfolio</h3>
+  <input type="file" id="img-file" accept="image/*" />
+  <input type="text" id="caption" placeholder="Name / Caption" />
+  <select id="type">
+    <option value="commission">Commission</option>
+    <option value="hobby">Hobby</option>
+  </select>
+  <button id="add-item-btn">Add Item</button>
+  <hr />
+  <div id="portfolio-list">No items yet.</div>
+</div>
+
+<footer>
+  &copy; 2025 Mati. All rights reserved.
+</footer>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Config Firebase - use seu config real aqui
+  const firebaseConfig = {
+    apiKey: "AIzaSyDtTJVRcTfMEkPyVN5wV7orOKBeoez7wII",
+    authDomain: "matiportfolio-bc291.firebaseapp.com",
+    databaseURL: "https://matiportfolio-bc291-default-rtdb.firebaseio.com",
+    projectId: "matiportfolio-bc291",
+    storageBucket: "matiportfolio-bc291.appspot.com",
+    messagingSenderId: "802958377580",
+    appId: "1:802958377580:web:d30c5f93ef0208c2d98e49"
+  };
+
+  // Inicializa Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  // DOM
+  const tabs = document.querySelectorAll('nav button');
+  const sections = document.querySelectorAll('main section');
+  const addBtn = document.getElementById('add-btn');
+  const editPanel = document.getElementById('edit-panel');
+  const imgFileInput = document.getElementById('img-file');
+  const captionInput = document.getElementById('caption');
+  const typeSelect = document.getElementById('type');
+  const addItemBtn = document.getElementById('add-item-btn');
+  const portfolioListDiv = document.getElementById('portfolio-list');
+  const portfolioGrid = document.querySelector('.portfolio-grid');
+
+  let portfolioItems = [];
+  let isOwner = false;
+
+  // Tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      sections.forEach(s => s.classList.remove('active'));
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Load portfolio from Firebase realtime DB
+  function loadPortfolio(callback) {
+    db.ref('portfolioItems').on('value', snapshot => {
+      const data = snapshot.val();
+      portfolioItems = data || [];
+      callback(portfolioItems);
+    });
+  }
+
+  // Save portfolio to Firebase realtime DB
+  function savePortfolio(items) {
+    db.ref('portfolioItems').set(items);
+  }
+
+  // Render portfolio grid
+  function renderPortfolio(items) {
+    portfolioGrid.innerHTML = '';
+    items.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.classList.add('portfolio-item');
+      if (isOwner) div.classList.add('owner');
+
+      const img = document.createElement('img');
+      img.src = item.img;
+      img.alt = item.caption;
+
+      const captionDiv = document.createElement('div');
+      captionDiv.className = 'portfolio-caption';
+      captionDiv.textContent = item.caption;
+
+      const badge = document.createElement('span');
+      badge.className = 'portfolio-badge';
+      badge.textContent = item.type === 'commission' ? 'Commission' : 'Hobby';
+      captionDiv.appendChild(badge);
+
+      div.appendChild(img);
+      div.appendChild(captionDiv);
+
+      if (isOwner) {
+        const remBtn = document.createElement('button');
+        remBtn.className = 'remove-btn';
+        remBtn.textContent = 'Remove';
+        remBtn.addEventListener('click', () => {
+          portfolioItems.splice(idx, 1);
+          savePortfolio(portfolioItems);
+        });
+        div.appendChild(remBtn);
+      }
+
+      portfolioGrid.appendChild(div);
+    });
+    renderPortfolioList();
+  }
+
+  // Render portfolio list in edit panel
+  function renderPortfolioList() {
+    portfolioListDiv.innerHTML = '';
+    if (portfolioItems.length === 0) {
+      portfolioListDiv.textContent = 'No items yet.';
+      return;
+    }
+    portfolioItems.forEach((item, idx) => {
+      const p = document.createElement('p');
+      p.textContent = `${idx + 1}. ${item.caption} (${item.type})`;
+      portfolioListDiv.appendChild(p);
+    });
+  }
+
+  // Add item button clicked
+  addItemBtn.addEventListener('click', () => {
+    const files = imgFileInput.files;
+    if (!files || files.length === 0) {
+      alert('Please select an image file.');
+      return;
+    }
+    const caption = captionInput.value.trim();
+    if (!caption) {
+      alert('Please enter a name/caption.');
+      return;
+    }
+    const type = typeSelect.value;
+
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64 = e.target.result;
+
+      portfolioItems.push({ img: base64, caption, type });
+      savePortfolio(portfolioItems);
+
+      // Limpar inputs
+      imgFileInput.value = '';
+      captionInput.value = '';
+      typeSelect.value = 'commission';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Toggle edit panel
+  addBtn.addEventListener('click', () => {
+    if (editPanel.style.display === 'none' || editPanel.style.display === '') {
+      editPanel.style.display = 'block';
+    } else {
+      editPanel.style.display = 'none';
+    }
+  });
+
+  // Login prompt — Ctrl+1 shortcut
+  window.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key === '1') {
+      if (document.hasFocus()) {
+        const email = prompt('Owner login - enter email:');
+        if (!email) return alert('Cancelled.');
+        const password = prompt('Enter password:');
+        if (!password) return alert('Cancelled.');
+
+        auth.signInWithEmailAndPassword(email, password)
+          .then(() => {
+            alert('Logged in as owner!');
+          })
+          .catch(() => {
+            alert('Login failed!');
+          });
+      }
+    }
+  });
+
+  // Logout function (optional: pode criar um botão logout na UI se quiser)
+  function logout() {
+    auth.signOut();
+  }
+
+  // Observe auth state
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      isOwner = true;
+      addBtn.style.display = 'block';
+      loadPortfolio(renderPortfolio);
+      renderPortfolioList();
+      editPanel.style.display = 'none'; // começar escondido
+    } else {
+      isOwner = false;
+      addBtn.style.display = 'none';
+      editPanel.style.display = 'none';
+      loadPortfolio(renderPortfolio);
+    }
+  });
+
+  // Load portfolio inicial
+  loadPortfolio(renderPortfolio);
+});
+</script>
+
+</body>
+</html>
